@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 // See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World! ♣️ ♦️ ♥️ ♠️");
+//Console.WriteLine("Hello, World! ♣️ ♦️ ♥️ ♠️");
 
 /* To Do
 ----------
@@ -26,13 +26,36 @@ Console.WriteLine("Hello, World! ♣️ ♦️ ♥️ ♠️");
 * 
 */
 
-// Well, we want to start with a deck
-List<string> deck = new List<string>();
+
 
 // Big O inefficient but I prefer generation :D
 // generate 4 suits of Aces, 2-10, Jake, Queen, King.
+// 4 suits
+
+// Well, we want to start with a deck
+var deck = new List<string>();
 var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
-for (int i = 0; i < 4; i++)
+var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
+
+for (int i = 0; i < suits.Count; i++)
 {
-    Console.WriteLine(suits[i]);
+    for (int j = 0; j < ranks.Count; j++)
+    {
+        // Console.Write(ranks[j] + suits[i]);
+        // Console.Write("   "); // emojis need space
+        deck.Add(ranks[j] + suits[i]);
+    }
 }
+
+// test deck by printing list
+foreach (var card in deck)
+{
+    Console.Write(card);
+    Console.Write("   ");
+}
+
+// I suppose next step is randomizing the deck
+
+// then maybe betting?
+
+// then maybe dealing?
