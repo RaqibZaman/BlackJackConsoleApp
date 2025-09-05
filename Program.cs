@@ -26,13 +26,27 @@ using System.Collections.Generic;
 * 
 */
 
+//// Functions ////
 
+void toStringDeck(List<string> deck)
+{
+    foreach (var card in deck)
+    {
+        Console.Write(card);
+        Console.Write("   ");
+    }
+    Console.WriteLine();
+    Console.WriteLine();
+}
+
+
+// NOTE TO REVIEWRS: I don't play cards!
 
 // Big O inefficient but I prefer generation :D
 // generate 4 suits of Aces, 2-10, Jake, Queen, King.
 // 4 suits
 
-// Well, we want to start with a deck
+// 1) Start with a standard 52 deck of cards
 var deck = new List<string>();
 var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
 var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
@@ -47,15 +61,61 @@ for (int i = 0; i < suits.Count; i++)
     }
 }
 
-// test deck by printing list
-foreach (var card in deck)
-{
-    Console.Write(card);
-    Console.Write("   ");
-}
+// <test> deck by printing list
+toStringDeck(deck);
+// foreach (var card in deck)
+// {
+//     Console.Write(card);
+//     Console.Write("   ");
+// }
 
-// I suppose next step is randomizing the deck
+// 2) I suppose next step is randomizing the deck
+var rand = new Random();    // seed is based on system clock
+deck = deck.OrderBy(x => rand.Next()).ToList();
 
-// then maybe betting?
+// <test> randomization or deck shuffle
+toStringDeck(deck);
+// Console.WriteLine();
+// Console.WriteLine();
+// foreach (var card in deck)
+// {
+//     Console.Write(card);
+//     Console.Write("   ");
+// }
 
-// then maybe dealing?
+// 3) then the initial bet
+// bet between $10 to $500
+int bank = 100;
+string msg = $"Enter your bet between $10-$500 {bank}";
+Console.WriteLine(msg);
+
+
+
+// then maybe dealing the cards?
+
+// total higher than 21 is bust
+
+// place bet
+// dealer deals 1 card faced up to player and 1 faced up themselves
+// dealer deals 2nd card faced up to player and 1 faced down for themselves
+//
+
+// need a reprint of total amount available
+
+/*
+Cycle of a Blackjack round:
+1. Players place bets within table limits.
+2. Dealer shuffles (or uses a shoe if multiple decks).
+3. Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
+4. Check for natural Blackjack (21 with first two cards):
+    a. If dealer has it, hand ends (unless player also has it → push).
+    b. If players have it and dealer doesn’t, they’re paid immediately.
+5. Player turns (starting left of dealer):
+    a. Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
+6. Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
+7. Compare hands:
+    a. If player busts → automatic loss.
+    b. If dealer busts → remaining players win.
+    c. Otherwise, higher total ≤21 wins; equal totals = push (tie).
+8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
+*/
