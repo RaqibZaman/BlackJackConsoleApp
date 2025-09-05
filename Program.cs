@@ -55,19 +55,12 @@ for (int i = 0; i < suits.Count; i++)
 {
     for (int j = 0; j < ranks.Count; j++)
     {
-        // Console.Write(ranks[j] + suits[i]);
-        // Console.Write("   "); // emojis need space
         deck.Add(ranks[j] + suits[i]);
     }
 }
 
 // <test> deck by printing list
 toStringDeck(deck);
-// foreach (var card in deck)
-// {
-//     Console.Write(card);
-//     Console.Write("   ");
-// }
 
 // 2) I suppose next step is randomizing the deck
 var rand = new Random();    // seed is based on system clock
@@ -75,21 +68,29 @@ deck = deck.OrderBy(x => rand.Next()).ToList();
 
 // <test> randomization or deck shuffle
 toStringDeck(deck);
-// Console.WriteLine();
-// Console.WriteLine();
-// foreach (var card in deck)
-// {
-//     Console.Write(card);
-//     Console.Write("   ");
-// }
 
 // 3) then the initial bet
 // bet between $10 to $500
 int bank = 100;
-string msg = $"Enter your bet between $10-$500 {bank}";
-Console.WriteLine(msg);
+string bank_msg = $"Available Cash: ${bank}";
+Console.WriteLine(bank_msg);
+Console.WriteLine("Enter your bet between $10-$500 as plain integer");
+string? bet = "";   // should not be null btw
+int parsedBet = 0;
 
-
+// if the user is an idot and puts in letters, empty space, value outside 10-500
+while (true)
+{
+    bet = Console.ReadLine();
+    int.TryParse(bet, out parsedBet);
+    if (int.TryParse(bet, out parsedBet) && parsedBet > 9 && parsedBet < 501)
+    {
+        break;
+    }
+    Console.WriteLine("Dude, bet integer between $10-$500...");
+}
+string bet_msg = $"You placed a ${parsedBet} bet";
+Console.WriteLine(bet_msg);
 
 // then maybe dealing the cards?
 
