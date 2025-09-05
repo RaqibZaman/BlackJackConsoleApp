@@ -25,7 +25,8 @@ using System.Collections.Generic;
 * 
 * 
 */
-
+// NOTE TO REVIEWRS: I don't play cards!
+// MOTO: keep abstracting until it makes sense.
 //// Functions ////
 
 void toStringDeck(List<string> deck)
@@ -39,60 +40,82 @@ void toStringDeck(List<string> deck)
     Console.WriteLine();
 }
 
-
-// NOTE TO REVIEWRS: I don't play cards!
-
 // Big O inefficient but I prefer generation :D
 // generate 4 suits of Aces, 2-10, Jake, Queen, King.
 // 4 suits
-
-// 1) Start with a standard 52 deck of cards
-var deck = new List<string>();
-var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
-var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
-
-for (int i = 0; i < suits.Count; i++)
+List<string> genDeck()
 {
-    for (int j = 0; j < ranks.Count; j++)
+    var deck = new List<string>();
+    var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
+    var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
+    for (int i = 0; i < suits.Count; i++)
     {
-        deck.Add(ranks[j] + suits[i]);
+        for (int j = 0; j < ranks.Count; j++)
+        {
+            deck.Add(ranks[j] + suits[i]);
+        }
     }
+    return deck;
 }
 
-// <test> deck by printing list
-toStringDeck(deck);
+List<string> shuffleDeck(List<string> deck)
+{
+    var rand = new Random();    // seed is based on system clock
+    deck = deck.OrderBy(x => rand.Next()).ToList();
+    return deck;
+}
+// need to make sure change in function propagates outside func. scope. Force by using "ref" or "out" if needed. Will have to test I suppose.
+void placeBet(ref int bank, ref string? bet, ref int parsedBet)
+{
+    Console.WriteLine($"Available Cash: ${bank}");
+    Console.WriteLine("Enter your bet between $10-$500 as plain integer");
 
-// 2) I suppose next step is randomizing the deck
-var rand = new Random();    // seed is based on system clock
-deck = deck.OrderBy(x => rand.Next()).ToList();
+    // if the user is an idot and puts in letters, empty space, value outside 10-500
+    while (true)
+    {
+        bet = Console.ReadLine();
+        int.TryParse(bet, out parsedBet);
+        if (int.TryParse(bet, out parsedBet) && parsedBet > 9 && parsedBet < 501 && parsedBet <= bank)
+        {
+            break;
+        }
+        if (parsedBet > bank)
+        {
+            Console.WriteLine("You do not have enough money...");
+            Console.WriteLine($"Available Cash: ${bank}");
+        }
+        else
+        {
+            Console.WriteLine("Dude, bet integer between $10-$500...");
+        }
+        
+    }
+    Console.WriteLine($"You placed a ${parsedBet} bet");
+    // update bank account
+    bank -= parsedBet;
+    Console.WriteLine($"Available Cash: ${bank}");
+}
 
-// <test> randomization or deck shuffle
-toStringDeck(deck);
+// --- ew code! Let's abstract away into functions
+
+
+
+var deck = genDeck();   // 1) Start with a standard 52 deck of cards
+toStringDeck(deck);     // <test> deck by printing list
+deck = shuffleDeck(deck);   // 2) I suppose next step is randomizing the deck
+toStringDeck(deck);     // <test> randomization or deck shuffle
 
 // 3) then the initial bet
 // bet between $10 to $500
 int bank = 100;
-string bank_msg = $"Available Cash: ${bank}";
-Console.WriteLine(bank_msg);
-Console.WriteLine("Enter your bet between $10-$500 as plain integer");
-string? bet = "";   // should not be null btw
+string? bet = "";
 int parsedBet = 0;
+placeBet(ref bank, ref bet, ref parsedBet);
+Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // test if ref passed change over scope
 
-// if the user is an idot and puts in letters, empty space, value outside 10-500
-while (true)
-{
-    bet = Console.ReadLine();
-    int.TryParse(bet, out parsedBet);
-    if (int.TryParse(bet, out parsedBet) && parsedBet > 9 && parsedBet < 501)
-    {
-        break;
-    }
-    Console.WriteLine("Dude, bet integer between $10-$500...");
-}
-string bet_msg = $"You placed a ${parsedBet} bet";
-Console.WriteLine(bet_msg);
 
 // then maybe dealing the cards?
+// deal 1 card to player and then 1 card to dealer
 
 // total higher than 21 is bust
 
@@ -103,10 +126,13 @@ Console.WriteLine(bet_msg);
 
 // need a reprint of total amount available
 
+
+
+
 /*
 Cycle of a Blackjack round:
-1. Players place bets within table limits.
-2. Dealer shuffles (or uses a shoe if multiple decks).
+1.[x] Players place bets within table limits.
+2.[x] Dealer shuffles (or uses a shoe if multiple decks).
 3. Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
 4. Check for natural Blackjack (21 with first two cards):
     a. If dealer has it, hand ends (unless player also has it → push).
@@ -119,4 +145,26 @@ Cycle of a Blackjack round:
     b. If dealer busts → remaining players win.
     c. Otherwise, higher total ≤21 wins; equal totals = push (tie).
 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
+
 */
+
+
+string getRecked = @"⠀⠀⠀⣿⣿⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢀⣿⣿⣿⣿⣿⣿⣆⡀⠀⠀⠀⠀⣠⣴⣦⡄⢤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣷⣷⣶⣶⣿⣿⣿⣿⡀⣽⡿⣶⣦⡀⠀⠀⠀⠀⠀
+⠀⠀⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡿⣿⣿⣿⣿⣆⠀⠀⠀⠀
+⠀⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣦⠀⠀⠀
+⠀⠀⢾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣟⣿⣿⣿⣿⣿⡿⢟⣿⣷⡀⠀
+⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣭⣿⣿⣽⣿⣽⣾⣿⣿⣿⠛⠉⠉⠀⢈⣿⣿⡇⠀
+⠀⠀⠀⢻⣿⣿⠛⠉⠛⠻⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠡⠤⠄⠁⠀⠀⢻⣿⡇⠀
+⠀⠀⠀⠘⣿⣿⠄⠀⠀⠀⠀⠀⣉⠙⠋⢿⣿⣯⠀⠀⠀⠀⠀⠀⣰⣿⣿⡿⡃⠀
+⠀⠀⠀⠀⢹⣿⣇⣀⠀⠈⠉⠉⠁⠀⣤⢠⣿⣿⣧⡆⣤⣤⡀⣾⣿⣿⣿⢠⡇⠀
+⠀⠀⠀⠀⠀⣿⣿⣿⣷⣤⠄⣀⣴⣧⣹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⠇⠀
+⠀⠀⠀⠀⠀⠸⣿⣯⠉⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⡯⠁⡌⠀⠀
+⠀⠀⠀⠀⠀⠀⠙⢿⡄⢿⣿⣿⣿⣿⣿⣎⠙⠻⠛⣁⣼⣿⣿⡿⠛⠁⡸⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠈⢿⡄⠉⣿⡿⣿⣿⣿⣿⣷⣬⣿⡿⠟⠋⢀⣴⡞⠁⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⠀⠀⠀⠀⠉⠉⠋⠉⠉⠁⠀⢀⣴⣿⡿⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⣿⣿⣿⣿⣿⠿⢃⣴⣿⣿⣿⠃⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀";
+// Console.WriteLine(getRecked);
