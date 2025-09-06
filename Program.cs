@@ -60,7 +60,8 @@ List<string> genDeck()
 
 List<string> shuffleDeck(List<string> deck)
 {
-    var rand = new Random();    // seed is based on system clock
+    //var rand = new Random();    // seed is based on system clock
+    var rand = new Random(1);     // fixed randomization for testing
     deck = deck.OrderBy(x => rand.Next()).ToList();
     return deck;
 }
@@ -105,17 +106,53 @@ toStringDeck(deck);     // <test> deck by printing list
 deck = shuffleDeck(deck);   // 2) I suppose next step is randomizing the deck
 toStringDeck(deck);     // <test> randomization or deck shuffle
 
-// 3) then the initial bet
-// bet between $10 to $500
-int bank = 100;
-string? bet = "";
-int parsedBet = 0;
-placeBet(ref bank, ref bet, ref parsedBet);
-Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // test if ref passed change over scope
+int bank = 100; string? bet = ""; int parsedBet = 0;    
+placeBet(ref bank, ref bet, ref parsedBet); // 3) place the initial bet
+Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test> if ref passed change over scope
 
 
-// then maybe dealing the cards?
-// deal 1 card to player and then 1 card to dealer
+// 4) deal the cards
+// from deck to dealer and player hands
+List<string> dealerHand = new List<string>();
+List<string> playerHand = new List<string>();
+// the card value calculation depends on the hands. (hand) => {calculation}
+
+// pass card to player and deal and print them out
+
+
+void initialDeal(ref List<string> dealerHand, ref List<string> playerHand, ref List<string> deck)
+{
+    // toggle giving cards to player and dealer
+    string recipient = "p";
+    for (int i = 0; i < 4; i++) // hand out 4 cards
+    {
+        // remove card from top of deck
+        var card = deck[0];
+        deck.RemoveAt(0);
+
+        if (recipient == "p")
+        {
+            playerHand.Add(card);
+            recipient = "d";    // switch recipient
+        }
+        else
+        {
+            dealerHand.Add(card);
+            recipient = "p";    // switch recipient
+        }   
+    }
+}
+
+// auto assume value of ace, depending on what wins you the game
+// if you go over 21 with ace, then its value drops to 1. So starts at 11, reduces to 1 to avoid bust
+// if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
+
+// round 1
+// deal 1 faced-up card to player
+// deal 1 faced-up card to dealer
+// round 2
+// deal 1 faced-up card to player
+// deal 1 faced-DOWN card to dealer
 
 // total higher than 21 is bust
 
@@ -124,9 +161,14 @@ Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // test 
 // dealer deals 2nd card faced up to player and 1 faced down for themselves
 //
 
+// you can keep asking for another card until you bust (over 21)
+// finish round by "stay" to abstain
+
+
 // need a reprint of total amount available
 
-
+// "hit" to ask for another card, "stay" to abstain
+// Dealer: After the players are done hitting, he flips his faced-down card. If it is 16 or under, he has to pick another card from the deck. If his hand is 17 or higher, the dealer has to stay with his hand of cards. If the dealer busts, then player wins twice the bet.
 
 
 /*
