@@ -29,7 +29,7 @@ using System.Collections.Generic;
 // MOTO: keep abstracting until it makes sense.
 //// Functions ////
 
-void toStringDeck(List<string> deck)
+void PrintCards(List<string> deck)
 {
     foreach (var card in deck)
     {
@@ -43,7 +43,7 @@ void toStringDeck(List<string> deck)
 // Big O inefficient but I prefer generation :D
 // generate 4 suits of Aces, 2-10, Jake, Queen, King.
 // 4 suits
-List<string> genDeck()
+List<string> GenDeck()
 {
     var deck = new List<string>();
     var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
@@ -58,7 +58,7 @@ List<string> genDeck()
     return deck;
 }
 
-List<string> shuffleDeck(List<string> deck)
+List<string> ShuffleDeck(List<string> deck)
 {
     //var rand = new Random();    // seed is based on system clock
     var rand = new Random(1);     // fixed randomization for testing
@@ -66,7 +66,7 @@ List<string> shuffleDeck(List<string> deck)
     return deck;
 }
 // need to make sure change in function propagates outside func. scope. Force by using "ref" or "out" if needed. Will have to test I suppose.
-void placeBet(ref int bank, ref string? bet, ref int parsedBet)
+void PlaceBet(ref int bank, ref string? bet, ref int parsedBet)
 {
     Console.WriteLine($"Available Cash: ${bank}");
     Console.WriteLine("Enter your bet between $10-$500 as plain integer");
@@ -101,13 +101,13 @@ void placeBet(ref int bank, ref string? bet, ref int parsedBet)
 
 
 
-var deck = genDeck();   // 1) Start with a standard 52 deck of cards
-toStringDeck(deck);     // <test> deck by printing list
-deck = shuffleDeck(deck);   // 2) I suppose next step is randomizing the deck
-toStringDeck(deck);     // <test> randomization or deck shuffle
+var deck = GenDeck();   // 1) Start with a standard 52 deck of cards
+PrintCards(deck);     // <test> deck by printing list
+deck = ShuffleDeck(deck);   // 2) I suppose next step is randomizing the deck
+PrintCards(deck);     // <test> randomization or deck shuffle
 
 int bank = 100; string? bet = ""; int parsedBet = 0;    
-placeBet(ref bank, ref bet, ref parsedBet); // 3) place the initial bet
+PlaceBet(ref bank, ref bet, ref parsedBet); // 3) place the initial bet
 Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test> if ref passed change over scope
 
 
@@ -119,29 +119,41 @@ List<string> playerHand = new List<string>();
 
 // pass card to player and deal and print them out
 
+// remove card from top of deck
+string DrawCard(ref List<string> deck)
+{
+    var card = deck[0];
+    deck.RemoveAt(0);
+    return card;
+}
 
-void initialDeal(ref List<string> dealerHand, ref List<string> playerHand, ref List<string> deck)
+void InitialDeal(ref List<string> dealerHand, ref List<string> playerHand, ref List<string> deck)
 {
     // toggle giving cards to player and dealer
     string recipient = "p";
     for (int i = 0; i < 4; i++) // hand out 4 cards
     {
-        // remove card from top of deck
-        var card = deck[0];
-        deck.RemoveAt(0);
-
         if (recipient == "p")
         {
-            playerHand.Add(card);
+            playerHand.Add(DrawCard(ref deck));
             recipient = "d";    // switch recipient
         }
         else
         {
-            dealerHand.Add(card);
+            dealerHand.Add(DrawCard(ref deck));
             recipient = "p";    // switch recipient
         }   
     }
 }
+
+InitialDeal(ref dealerHand, ref playerHand, ref deck);
+
+Console.WriteLine("Player Cards");
+PrintCards(playerHand);
+Console.WriteLine("Dealer Cards");
+PrintCards(dealerHand);
+Console.WriteLine("Deck Cards");
+PrintCards(deck);
 
 // auto assume value of ace, depending on what wins you the game
 // if you go over 21 with ace, then its value drops to 1. So starts at 11, reduces to 1 to avoid bust
