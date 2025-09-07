@@ -89,7 +89,7 @@ void PlaceBet(ref int bank, ref string? bet, ref int parsedBet)
         {
             Console.WriteLine("Dude, bet integer between $10-$500...");
         }
-        
+
     }
     Console.WriteLine($"You placed a ${parsedBet} bet");
     // update bank account
@@ -97,7 +97,56 @@ void PlaceBet(ref int bank, ref string? bet, ref int parsedBet)
     Console.WriteLine($"Available Cash: ${bank}");
 }
 
-// --- ew code! Let's abstract away into functions
+// draw a card from the top of deck
+string DrawCard(ref List<string> deck)
+{
+    var card = deck[0];
+    deck.RemoveAt(0);
+    return card;
+}
+
+// initial drawing- 2 for player, 2 for dealer
+void InitialDeal(ref List<string> dealerHand, ref List<string> playerHand, ref List<string> deck)
+{
+    // toggle giving cards to player and dealer
+    string recipient = "p";
+    for (int i = 0; i < 4; i++) // hand out 4 cards
+    {
+        if (recipient == "p")
+        {
+            playerHand.Add(DrawCard(ref deck));
+            recipient = "d";    // switch recipient
+        }
+        else
+        {
+            dealerHand.Add(DrawCard(ref deck));
+            recipient = "p";    // switch recipient
+        }
+    }
+}
+
+// value of each card rank
+var cardValDict = new Dictionary<string, int>
+{
+    {"A", 11},   // subtract 10 if total is over 21
+    {"2", 2},
+    {"3", 3},
+    {"4", 4},
+    {"5", 5},
+    {"6", 6},
+    {"7", 7},
+    {"8", 8},
+    {"9", 9},
+    {"J", 10},
+    {"Q", 10},
+    {"K", 10}
+};
+
+
+
+// -----------------------------------------------
+// Abstract spaghetti away into functions --------
+// -----------------------------------------------
 
 
 
@@ -115,37 +164,8 @@ Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test
 // from deck to dealer and player hands
 List<string> dealerHand = new List<string>();
 List<string> playerHand = new List<string>();
-// the card value calculation depends on the hands. (hand) => {calculation}
 
-// pass card to player and deal and print them out
-
-// remove card from top of deck
-string DrawCard(ref List<string> deck)
-{
-    var card = deck[0];
-    deck.RemoveAt(0);
-    return card;
-}
-
-void InitialDeal(ref List<string> dealerHand, ref List<string> playerHand, ref List<string> deck)
-{
-    // toggle giving cards to player and dealer
-    string recipient = "p";
-    for (int i = 0; i < 4; i++) // hand out 4 cards
-    {
-        if (recipient == "p")
-        {
-            playerHand.Add(DrawCard(ref deck));
-            recipient = "d";    // switch recipient
-        }
-        else
-        {
-            dealerHand.Add(DrawCard(ref deck));
-            recipient = "p";    // switch recipient
-        }   
-    }
-}
-
+// pass 4 cards to player and dealer
 InitialDeal(ref dealerHand, ref playerHand, ref deck);
 
 Console.WriteLine("Player Cards");
@@ -155,6 +175,56 @@ PrintCards(dealerHand);
 Console.WriteLine("Deck Cards");
 PrintCards(deck);
 
+int dealerHandVal = 0;
+int playerHandVal = 0;
+// return tuple of total hand value and
+//(int dVal, int pVal) calcHandVal(ref List<string> hand, Dictionary<string, int> cardValDict)
+void calcTotalHandVal(ref List<string> hand, Dictionary<string, int> cardValDict)
+{
+    // keep track of the number of aces and the total. ace is +10 depending on the total to 21
+    int numberOfAces = 0;
+    int total = 0;
+    foreach (var card in hand)
+    {
+        if (card[0].ToString() == "A")
+        {
+            numberOfAces++;
+        }
+        total += cardValDict[card[0].ToString()];
+        Console.WriteLine(cardValDict[card[0].ToString()]);
+    }
+    Console.WriteLine($"Total: {total}");
+    // if total is more than 21, check for aces. If ace exists, subtract. And so on according to the number of aces and total
+    if (total > 21 && numberOfAces > 0)
+    {
+        for (int i = 0; i < numberOfAces; i++)
+        {
+            total -= 10;
+            if (total <= 21)
+            {
+                break;
+            }
+        }
+    }
+    Console.WriteLine($"Adjusted Total: {total}");
+}
+
+calcTotalHandVal(ref dealerHand, cardValDict);
+calcTotalHandVal(ref playerHand, cardValDict);
+
+var Ace_2 = new List<string> { "A♠️", "A♠️" };
+var Ace_3 = new List<string> {"A♠️","A♠️","A♠️"};
+
+calcTotalHandVal(ref Ace_3, cardValDict);
+
+// need function to show a hand and total value
+
+// 5) Let's calculate the value of the cards in a simple way 1st
+// dictionary of base card values. Ace is 1, add 10 if total is not over 21
+// use function to consume dictionary of card values and hands
+
+
+// the card value calculation depends on the hands. (hand) => {calculation}
 // auto assume value of ace, depending on what wins you the game
 // if you go over 21 with ace, then its value drops to 1. So starts at 11, reduces to 1 to avoid bust
 // if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
