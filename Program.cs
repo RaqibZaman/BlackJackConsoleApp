@@ -37,7 +37,6 @@ void PrintCards(List<string> deck)
         Console.Write("   ");
     }
     Console.WriteLine();
-    Console.WriteLine();
 }
 
 // Big O inefficient but I prefer generation :D
@@ -47,7 +46,7 @@ List<string> GenDeck()
 {
     var deck = new List<string>();
     var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
-    var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
+    var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K" }; // no jocker!
     for (int i = 0; i < suits.Count; i++)
     {
         for (int j = 0; j < ranks.Count; j++)
@@ -60,8 +59,8 @@ List<string> GenDeck()
 
 List<string> ShuffleDeck(List<string> deck)
 {
-    //var rand = new Random();    // seed is based on system clock
-    var rand = new Random(1);     // fixed randomization for testing
+    var rand = new Random();    // seed is based on system clock
+    // var rand = new Random(1);     // fixed randomization for testing
     deck = deck.OrderBy(x => rand.Next()).ToList();
     return deck;
 }
@@ -142,44 +141,8 @@ var cardValDict = new Dictionary<string, int>
     {"K", 10}
 };
 
-
-
-// -----------------------------------------------
-// Abstract spaghetti away into functions --------
-// -----------------------------------------------
-
-
-
-var deck = GenDeck();   // 1) Start with a standard 52 deck of cards
-PrintCards(deck);     // <test> deck by printing list
-deck = ShuffleDeck(deck);   // 2) I suppose next step is randomizing the deck
-PrintCards(deck);     // <test> randomization or deck shuffle
-
-int bank = 100; string? bet = ""; int parsedBet = 0;    
-PlaceBet(ref bank, ref bet, ref parsedBet); // 3) place the initial bet
-Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test> if ref passed change over scope
-
-
-// 4) deal the cards
-// from deck to dealer and player hands
-List<string> dealerHand = new List<string>();
-List<string> playerHand = new List<string>();
-
-// pass 4 cards to player and dealer
-InitialDeal(ref dealerHand, ref playerHand, ref deck);
-
-Console.WriteLine("Player Cards");
-PrintCards(playerHand);
-Console.WriteLine("Dealer Cards");
-PrintCards(dealerHand);
-Console.WriteLine("Deck Cards");
-PrintCards(deck);
-
-int dealerHandVal = 0;
-int playerHandVal = 0;
-// return tuple of total hand value and
-//(int dVal, int pVal) calcHandVal(ref List<string> hand, Dictionary<string, int> cardValDict)
-void calcTotalHandVal(ref List<string> hand, Dictionary<string, int> cardValDict)
+// return value of total hand
+int calcTotalHandVal(List<string> hand, Dictionary<string, int> cardValDict)
 {
     // keep track of the number of aces and the total. ace is +10 depending on the total to 21
     int numberOfAces = 0;
@@ -191,9 +154,9 @@ void calcTotalHandVal(ref List<string> hand, Dictionary<string, int> cardValDict
             numberOfAces++;
         }
         total += cardValDict[card[0].ToString()];
-        Console.WriteLine(cardValDict[card[0].ToString()]);
+        //Console.WriteLine(cardValDict[card[0].ToString()]);
     }
-    Console.WriteLine($"Total: {total}");
+    //Console.WriteLine($"Total: {total}");
     // if total is more than 21, check for aces. If ace exists, subtract. And so on according to the number of aces and total
     if (total > 21 && numberOfAces > 0)
     {
@@ -206,27 +169,105 @@ void calcTotalHandVal(ref List<string> hand, Dictionary<string, int> cardValDict
             }
         }
     }
-    Console.WriteLine($"Adjusted Total: {total}");
+    //Console.WriteLine($"Adjusted Total: {total}");
+    return total;
 }
 
-calcTotalHandVal(ref dealerHand, cardValDict);
-calcTotalHandVal(ref playerHand, cardValDict);
+// -----------------------------------------------
+// Abstract spaghetti away into functions --------
+// -----------------------------------------------
 
-var Ace_2 = new List<string> { "A♠️", "A♠️" };
-var Ace_3 = new List<string> {"A♠️","A♠️","A♠️"};
 
-calcTotalHandVal(ref Ace_3, cardValDict);
+// 1) Start with a standard 52 deck of cards
+var deck = GenDeck();
+PrintCards(deck);
+Console.WriteLine();
 
-// need function to show a hand and total value
+// 2) Shuffle the deck
+deck = ShuffleDeck(deck);
+PrintCards(deck);
+Console.WriteLine();
+
+// 3) place the initial bet
+int bank = 100; string? bet = ""; int parsedBet = 0;    
+PlaceBet(ref bank, ref bet, ref parsedBet); 
+Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test> if ref passed change over scope
+
+// 4) deal the cards
+List<string> dealerHand = new List<string>();
+List<string> playerHand = new List<string>();
+InitialDeal(ref dealerHand, ref playerHand, ref deck);  // pass 4 cards to player and dealer from deck
 
 // 5) Let's calculate the value of the cards in a simple way 1st
-// dictionary of base card values. Ace is 1, add 10 if total is not over 21
-// use function to consume dictionary of card values and hands
+int dealerHandVal = calcTotalHandVal(dealerHand, cardValDict);
+int playerHandVal = calcTotalHandVal(playerHand, cardValDict);
+
+Console.WriteLine();
+Console.WriteLine("Player Cards");
+PrintCards(playerHand);
+Console.WriteLine($"Total: {playerHandVal}");
+
+Console.WriteLine();
+Console.WriteLine("Dealer Cards");
+PrintCards(dealerHand);
+Console.WriteLine($"Total: {dealerHandVal}");
+
+Console.WriteLine();
+Console.WriteLine("Deck Cards Remaining");
+PrintCards(deck);
+
+// 6) Check for Blackjack 21 tie
+if (playerHandVal == 21 && dealerHandVal == 21)
+{
+    Console.WriteLine("Tie - Push to next round");
+}
+
+// 7). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
+// Each option represents a different set of steps to run. Store in function
+
+// Hit: draw card after initial drawing
+void hit(ref List<string> hand, ref List<string> deck, ref int handVal)
+{
+    Console.WriteLine("You drawed a card!");
+    // player takes a card, update hand
+    hand.Add(DrawCard(ref deck));
+    PrintCards(hand);
+    // calculate hand total
+    handVal = calcTotalHandVal(hand, cardValDict);
+    // getRecked if bust
+    isBust(handVal);
+}
+// if you lose
+void isBust(int handVal)
+{
+    if (handVal > 21)
+    {
+        Console.WriteLine("Your busted!");
+    }
+}
+// Stand: end turn
+// compare your hand to dealer's hand and see who wins
+
+Console.WriteLine("Enter option: [h] Hit, [s] Stand, [d] Double Down, [e] Surrender");
+while (true)
+{
+    var key = Console.ReadKey(intercept: false).KeyChar;
+    switch (key)
+    {
+        case 'h':
+            hit(ref playerHand, ref deck, ref playerHandVal);
+            break;
+    }
+
+}
+// Hit: draw a card
+// Stand: end turn
+// Double Down: Double bet, draw card, end turn
+// Split: ??? (eeh, skip for now)
+// Surrender: After initial deal, give up, but only lose 1/2 of bet
 
 
-// the card value calculation depends on the hands. (hand) => {calculation}
-// auto assume value of ace, depending on what wins you the game
-// if you go over 21 with ace, then its value drops to 1. So starts at 11, reduces to 1 to avoid bust
+
 // if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
 
 // round 1
@@ -257,8 +298,8 @@ calcTotalHandVal(ref Ace_3, cardValDict);
 Cycle of a Blackjack round:
 1.[x] Players place bets within table limits.
 2.[x] Dealer shuffles (or uses a shoe if multiple decks).
-3. Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
-4. Check for natural Blackjack (21 with first two cards):
+3.[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
+4.[ehh?X] Check for natural Blackjack (21 with first two cards):
     a. If dealer has it, hand ends (unless player also has it → push).
     b. If players have it and dealer doesn’t, they’re paid immediately.
 5. Player turns (starting left of dealer):
