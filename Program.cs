@@ -46,7 +46,7 @@ List<string> GenDeck()
 {
     var deck = new List<string>();
     var suits = new List<string> { "♦️", "♣️", "♥️", "♠️" };
-    var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K" }; // no jocker!
+    var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }; // no jocker!
     for (int i = 0; i < suits.Count; i++)
     {
         for (int j = 0; j < ranks.Count; j++)
@@ -136,7 +136,8 @@ var cardValDict = new Dictionary<string, int>
     {"7", 7},
     {"8", 8},
     {"9", 9},
-    {"J", 10},
+    {"1", 10},  // if I just read the value of first char, then "10" => '1' => int 10
+    { "J", 10},
     {"Q", 10},
     {"K", 10}
 };
@@ -153,7 +154,7 @@ int calcTotalHandVal(List<string> hand, Dictionary<string, int> cardValDict)
         {
             numberOfAces++;
         }
-        total += cardValDict[card[0].ToString()];
+        total += cardValDict[card[0].ToString()];   // 1st char of card string
         //Console.WriteLine(cardValDict[card[0].ToString()]);
     }
     //Console.WriteLine($"Total: {total}");
@@ -171,6 +172,52 @@ int calcTotalHandVal(List<string> hand, Dictionary<string, int> cardValDict)
     }
     //Console.WriteLine($"Adjusted Total: {total}");
     return total;
+}
+
+// Hit: draw card after initial drawing
+void hit(ref List<string> hand, ref List<string> deck, ref int handVal)
+{
+    Console.WriteLine("You drawed a card!");
+    // player takes a card, update hand
+    hand.Add(DrawCard(ref deck));
+    PrintCards(hand);
+    // calculate hand total
+    handVal = calcTotalHandVal(hand, cardValDict);
+    // getRecked if bust
+    isBust(handVal);
+}
+
+// if you lose
+void isBust(int handVal)
+{
+    if (handVal > 21)
+    {
+        Console.WriteLine("Your busted!");
+    }
+}
+
+
+void playerTurn(ref List<string> playerHand, ref List<string> deck, ref int playerHandVal)
+{
+    Console.WriteLine("Enter option: [h] Hit, [s] Stand, [d] Double Down, [e] Surrender");
+    while (true)
+    {
+        var key = Console.ReadKey(intercept: true).KeyChar;
+        switch (key)
+        {
+            case 'h':
+                hit(ref playerHand, ref deck, ref playerHandVal);
+                break;
+            case 's':
+                break;
+        }
+
+        // exit player turn
+        if (key == 's')
+        {
+            break;
+        }
+    }
 }
 
 // -----------------------------------------------
@@ -209,12 +256,15 @@ Console.WriteLine($"Total: {playerHandVal}");
 
 Console.WriteLine();
 Console.WriteLine("Dealer Cards");
-PrintCards(dealerHand);
-Console.WriteLine($"Total: {dealerHandVal}");
+
+// PrintCards(dealerHand);
+// Console.WriteLine($"Total: {dealerHandVal}");
+Console.WriteLine(dealerHand[0]);   // hide dealer's 2nd card
+Console.WriteLine($"partial: {cardValDict[dealerHand[0][0].ToString()]}");  // hide total
 
 Console.WriteLine();
-Console.WriteLine("Deck Cards Remaining");
-PrintCards(deck);
+// Console.WriteLine("Deck Cards Remaining");
+// PrintCards(deck);
 
 // 6) Check for Blackjack 21 tie
 if (playerHandVal == 21 && dealerHandVal == 21)
@@ -223,43 +273,18 @@ if (playerHandVal == 21 && dealerHandVal == 21)
 }
 
 // 7). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
-// Each option represents a different set of steps to run. Store in function
+    // Double Down: draw a card, double bet, and stand. Dealer hits until over 17
+    // Surrender: forfeit, dealer wins, lose half of bet
+    // Stand: end turn
+playerTurn(ref playerHand, ref deck, ref playerHandVal);
 
-// Hit: draw card after initial drawing
-void hit(ref List<string> hand, ref List<string> deck, ref int handVal)
-{
-    Console.WriteLine("You drawed a card!");
-    // player takes a card, update hand
-    hand.Add(DrawCard(ref deck));
-    PrintCards(hand);
-    // calculate hand total
-    handVal = calcTotalHandVal(hand, cardValDict);
-    // getRecked if bust
-    isBust(handVal);
-}
-// if you lose
-void isBust(int handVal)
-{
-    if (handVal > 21)
-    {
-        Console.WriteLine("Your busted!");
-    }
-}
-// Stand: end turn
-// compare your hand to dealer's hand and see who wins
+// 8). Dealer's turn
+Console.WriteLine("Dealer's Turn");
+// dealer flips up the face-down card
+// check dealer hand value
+// if hand is less than 17, keep hitting
+// compare player and dealers hands. Either lose, win, or push (tie)
 
-Console.WriteLine("Enter option: [h] Hit, [s] Stand, [d] Double Down, [e] Surrender");
-while (true)
-{
-    var key = Console.ReadKey(intercept: false).KeyChar;
-    switch (key)
-    {
-        case 'h':
-            hit(ref playerHand, ref deck, ref playerHandVal);
-            break;
-    }
-
-}
 // Hit: draw a card
 // Stand: end turn
 // Double Down: Double bet, draw card, end turn
