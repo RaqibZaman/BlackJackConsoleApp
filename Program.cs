@@ -65,15 +65,16 @@ List<string> ShuffleDeck(List<string> deck)
     return deck;
 }
 // need to make sure change in function propagates outside func. scope. Force by using "ref" or "out" if needed. Will have to test I suppose.
-void PlaceBet(ref int bank, ref string? bet, ref int parsedBet)
+int PlaceBet(ref int bank)
 {
     Console.WriteLine($"Available Cash: ${bank}");
     Console.WriteLine("Enter your bet between $10-$500 as plain integer");
 
     // if the user is an idot and puts in letters, empty space, value outside 10-500
+    int parsedBet = 0;
     while (true)
     {
-        bet = Console.ReadLine();
+        string? bet = Console.ReadLine();
         int.TryParse(bet, out parsedBet);
         if (int.TryParse(bet, out parsedBet) && parsedBet > 9 && parsedBet < 501 && parsedBet <= bank)
         {
@@ -92,8 +93,9 @@ void PlaceBet(ref int bank, ref string? bet, ref int parsedBet)
     }
     Console.WriteLine($"You placed a ${parsedBet} bet");
     // update bank account
-    bank -= parsedBet;
-    Console.WriteLine($"Available Cash: ${bank}");
+    //bank -= parsedBet;
+    //Console.WriteLine($"Available Cash: ${bank}");
+    return parsedBet;
 }
 
 // draw a card from the top of deck
@@ -185,20 +187,26 @@ void hit(ref List<string> hand, ref List<string> deck, ref int handVal)
     handVal = calcTotalHandVal(hand, cardValDict);
     Console.WriteLine($"Total: {handVal}");
     // getRecked if bust
-    isBust(handVal);    // I could return true if busted, later implementation
+    //isBust(handVal);
 }
 
 // if you lose
-void isBust(int handVal)
+bool isBust(int handVal)
 {
     if (handVal > 21)
     {
         Console.WriteLine("Your busted!");
+        return true;
     }
+    return false;
 }
 
-
-void playerTurn(ref List<string> playerHand, ref List<string> deck, ref int playerHandVal)
+// Double Down: Double bet, draw card, end turn
+// Surrender: forfeit, dealer wins, lose half of bet
+// [x] Stand: end turn
+// [x] Hit: draw a card
+// Split: ??? (eeh, skip for now)
+bool playerTurn(ref List<string> playerHand, ref List<string> deck, ref int playerHandVal)
 {
     Console.WriteLine("Enter option: [h] Hit, [s] Stand, [d] Double Down, [e] Surrender");
     while (true)
@@ -210,141 +218,159 @@ void playerTurn(ref List<string> playerHand, ref List<string> deck, ref int play
                 hit(ref playerHand, ref deck, ref playerHandVal);
                 break;
             case 's':
-                break;
+                return false; // exit
         }
 
-        // exit player turn
-        if (key == 's')
+        if (isBust(playerHandVal))
         {
-            break;
+            return true;
         }
+        // exit player turn
+        // if (key == 's')
+        // {
+        //     break;
+        // }
     }
 }
 
-void dealerTurn(ref List<string> dealerHand, ref List<string> deck, ref int dealerHandVal, ref int playerHandVal)
+void dealerTurn(ref List<string> dealerHand, ref List<string> deck, ref int dealerHandVal)
 {
-
     // check dealer hand value
     // if hand is less than 17, keep hitting
     while (dealerHandVal < 17)
     {
         hit(ref dealerHand, ref deck, ref dealerHandVal);
     }
+}
+
+
+int gameResult(ref int dealerHandVal, ref int playerHandVal, ref int bank, ref int bet)
+{
     // compare player and dealers hands. Either lose, win, or push (tie)
     // dealer hand > 21 => bust
-    if (dealerHandVal > 21)
+    string result = "";
+    if (playerHandVal > 21)
+    {
+        Console.WriteLine("Player loses");
+        result = "L";
+    }
+    else if (dealerHandVal > 21)
     {
         Console.WriteLine("Player wins");
+        result = "W";
     }
     // player hand > dealer hand => player wins
     else if (playerHandVal > dealerHandVal)
     {
         Console.WriteLine("Player wins");
+        result = "W";
     }
     // player hand == dealer hand => tie
     else if (playerHandVal == dealerHandVal)
     {
         Console.WriteLine("Tie - Push to next round");
+        result = "T";
     }
     // player hand < dealer hand => player loses
     else if (playerHandVal < dealerHandVal)
     {
         Console.WriteLine("Player loses");
+        result = "L";
     }
     else
     {
         Console.WriteLine("There's a bug");
     }
+
+    // bank account adjustment
+    switch (result)
+    {
+        case "W":
+            bank += bet;
+            break;
+        case "L":
+            bank -= bet;
+            break;
+        default:
+            break;
+    }
+    return bank;
 }
 
 // -----------------------------------------------
 // Abstract spaghetti away into functions --------
 // -----------------------------------------------
 
+int bank = 100;
 
-// 1) Start with a standard 52 deck of cards
-var deck = GenDeck();
-PrintCards(deck);
-Console.WriteLine();
+// 0) Loop game until bankrupt
+while (bank > 9)
+{
+    // 1) Start with a standard 52 deck of cards
+    var deck = GenDeck();
+    PrintCards(deck);
+    Console.WriteLine();
 
-// 2) Shuffle the deck
-deck = ShuffleDeck(deck);
-PrintCards(deck);
-Console.WriteLine();
+    // 2) Shuffle the deck
+    deck = ShuffleDeck(deck);
+    PrintCards(deck);
+    Console.WriteLine();
 
-// 3) place the initial bet
-int bank = 100; string? bet = ""; int parsedBet = 0;    
-PlaceBet(ref bank, ref bet, ref parsedBet); 
-Console.WriteLine($"bank: {bank} bet: {bet} parsedBet: {parsedBet}");   // <test> if ref passed change over scope
+    // 3) place the initial bet   
+    int bet = PlaceBet(ref bank); 
+    //Console.WriteLine($"bank: {bank} bet: {bet}");   // <test> if ref passed change over scope
 
-// 4) deal the cards
-List<string> dealerHand = new List<string>();
-List<string> playerHand = new List<string>();
-InitialDeal(ref dealerHand, ref playerHand, ref deck);  // pass 4 cards to player and dealer from deck
+    // 4) deal the cards
+    List<string> dealerHand = new List<string>();
+    List<string> playerHand = new List<string>();
+    InitialDeal(ref dealerHand, ref playerHand, ref deck);  // pass 4 cards to player and dealer from deck
 
-// 5) Let's calculate the value of the cards in a simple way 1st
-int dealerHandVal = calcTotalHandVal(dealerHand, cardValDict);
-int playerHandVal = calcTotalHandVal(playerHand, cardValDict);
+    // 5) Let's calculate the value of the cards in a simple way 1st
+    int dealerHandVal = calcTotalHandVal(dealerHand, cardValDict);
+    int playerHandVal = calcTotalHandVal(playerHand, cardValDict);
 
-Console.WriteLine();
-Console.WriteLine("Player Cards");
-PrintCards(playerHand);
-Console.WriteLine($"Total: {playerHandVal}");
+    Console.WriteLine();
+    Console.WriteLine("Player Cards");
+    PrintCards(playerHand);
+    Console.WriteLine($"Total: {playerHandVal}");
 
-Console.WriteLine();
-Console.WriteLine("Dealer Cards");
+    Console.WriteLine();
+    Console.WriteLine("Dealer Cards");
 
-Console.WriteLine(dealerHand[0]);   // hide dealer's 2nd card
-Console.WriteLine($"partial: {cardValDict[dealerHand[0][0].ToString()]}");  // hide total
+    Console.WriteLine(dealerHand[0]);   // hide dealer's 2nd card
+    Console.WriteLine($"partial: {cardValDict[dealerHand[0][0].ToString()]}");  // hide total
 
-Console.WriteLine();
-// Console.WriteLine("Deck Cards Remaining");
-// PrintCards(deck);
+    Console.WriteLine();
+    // Console.WriteLine("Deck Cards Remaining");
+    // PrintCards(deck);
 
+    // 6). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
+    bool playerBusted = false;  // track if player busts
+    playerBusted = playerTurn(ref playerHand, ref deck, ref playerHandVal);
 
+    // 7). Dealer's turn
+    Console.WriteLine("Dealer's Hand");
+    PrintCards(dealerHand); // dealer reveals face-down card
+    Console.WriteLine($"Total: {dealerHandVal}");
+    if (!playerBusted)  // skip dealer turn if player is already busted
+    {
+        dealerTurn(ref dealerHand, ref deck, ref dealerHandVal);
+    }
 
-// 6). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
-// Double Down: Double bet, draw card, end turn
-// Surrender: forfeit, dealer wins, lose half of bet
-// Stand: end turn
-// Hit: draw a card
-// Split: ??? (eeh, skip for now)
-playerTurn(ref playerHand, ref deck, ref playerHandVal);
+    // 8). Decide result of round, update player bank account
+    gameResult(ref dealerHandVal, ref playerHandVal, ref bank, ref bet);
+}
 
-// 7). Dealer's turn
-Console.WriteLine("Dealer's Turn");
-PrintCards(dealerHand); // dealer reveals face-down card
-Console.WriteLine($"Total: {dealerHandVal}");
-dealerTurn(ref dealerHand, ref deck, ref dealerHandVal, ref playerHandVal);
 
 // 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
+// track if player wins/loses/ties. Use a signal variable to track
+// win => bank + bet
+// lose => bank - bet
+// tie => next round
+
+// 9. Loop until player becomes  bankrupt
 
 
-
-// if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
-
-// round 1
-// deal 1 faced-up card to player
-// deal 1 faced-up card to dealer
-// round 2
-// deal 1 faced-up card to player
-// deal 1 faced-DOWN card to dealer
-
-// total higher than 21 is bust
-
-// place bet
-// dealer deals 1 card faced up to player and 1 faced up themselves
-// dealer deals 2nd card faced up to player and 1 faced down for themselves
-//
-
-// you can keep asking for another card until you bust (over 21)
-// finish round by "stay" to abstain
-
-
-// need a reprint of total amount available
-
-// "hit" to ask for another card, "stay" to abstain
-// Dealer: After the players are done hitting, he flips his faced-down card. If it is 16 or under, he has to pick another card from the deck. If his hand is 17 or higher, the dealer has to stay with his hand of cards. If the dealer busts, then player wins twice the bet.
 
 
 /*
@@ -389,4 +415,4 @@ string getRecked = @"⠀⠀⠀⣿⣿⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀�
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⣿⣿⣿⣿⣿⠿⢃⣴⣿⣿⣿⠃⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀";
-// Console.WriteLine(getRecked);
+Console.WriteLine(getRecked);
