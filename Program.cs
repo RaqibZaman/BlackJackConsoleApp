@@ -221,6 +221,42 @@ void playerTurn(ref List<string> playerHand, ref List<string> deck, ref int play
     }
 }
 
+void dealerTurn(ref List<string> dealerHand, ref List<string> deck, ref int dealerHandVal, ref int playerHandVal)
+{
+
+    // check dealer hand value
+    // if hand is less than 17, keep hitting
+    while (dealerHandVal < 17)
+    {
+        hit(ref dealerHand, ref deck, ref dealerHandVal);
+    }
+    // compare player and dealers hands. Either lose, win, or push (tie)
+    // dealer hand > 21 => bust
+    if (dealerHandVal > 21)
+    {
+        Console.WriteLine("Player wins");
+    }
+    // player hand > dealer hand => player wins
+    else if (playerHandVal > dealerHandVal)
+    {
+        Console.WriteLine("Player wins");
+    }
+    // player hand == dealer hand => tie
+    else if (playerHandVal == dealerHandVal)
+    {
+        Console.WriteLine("Tie - Push to next round");
+    }
+    // player hand < dealer hand => player loses
+    else if (playerHandVal < dealerHandVal)
+    {
+        Console.WriteLine("Player loses");
+    }
+    else
+    {
+        Console.WriteLine("There's a bug");
+    }
+}
+
 // -----------------------------------------------
 // Abstract spaghetti away into functions --------
 // -----------------------------------------------
@@ -277,30 +313,11 @@ playerTurn(ref playerHand, ref deck, ref playerHandVal);
 
 // 7). Dealer's turn
 Console.WriteLine("Dealer's Turn");
-// dealer flips up the face-down card
-PrintCards(dealerHand);
+PrintCards(dealerHand); // dealer reveals face-down card
 Console.WriteLine($"Total: {dealerHandVal}");
-
-void dealerTurn(ref List<string> dealerHand, ref List<string> deck, ref int dealerHandVal, ref int playerHandVal)
-{
-
-    // check dealer hand value
-    // if hand is less than 17, keep hitting
-    while (dealerHandVal < 17)
-    {
-        hit(ref dealerHand, ref deck, ref dealerHandVal);
-    }
-    // compare player and dealers hands. Either lose, win, or push (tie)
-    // 6) Check for Blackjack 21 tie
-    if (playerHandVal == 21 && dealerHandVal == 21)
-    {
-        Console.WriteLine("Tie - Push to next round");
-    }
-}
-
 dealerTurn(ref dealerHand, ref deck, ref dealerHandVal, ref playerHandVal);
 
-
+// 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
 
 
 
@@ -335,16 +352,20 @@ Cycle of a Blackjack round:
 1.[x] Players place bets within table limits.
 2.[x] Dealer shuffles (or uses a shoe if multiple decks).
 3.[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
-4.[ehh?X] Check for natural Blackjack (21 with first two cards):
+4.[x -skip] Check for natural Blackjack (21 with first two cards):
     a. If dealer has it, hand ends (unless player also has it → push).
     b. If players have it and dealer doesn’t, they’re paid immediately.
-5. Player turns (starting left of dealer):
-    a. Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
-6. Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
+5. [x -partial] Player turns (starting left of dealer):
+    a. [x] Choose to Hit
+    b. [x] Stand
+    c. [] Double Down
+    d. [] Split (if applicable)
+    e. [] or Surrender (if allowed).
+6. [x] Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
 7. Compare hands:
-    a. If player busts → automatic loss.
-    b. If dealer busts → remaining players win.
-    c. Otherwise, higher total ≤21 wins; equal totals = push (tie).
+    a. [x] If player busts → automatic loss.
+    b. [x] If dealer busts → remaining players win.
+    c. [x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
 
 */
