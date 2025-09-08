@@ -183,8 +183,9 @@ void hit(ref List<string> hand, ref List<string> deck, ref int handVal)
     PrintCards(hand);
     // calculate hand total
     handVal = calcTotalHandVal(hand, cardValDict);
+    Console.WriteLine($"Total: {handVal}");
     // getRecked if bust
-    isBust(handVal);
+    isBust(handVal);    // I could return true if busted, later implementation
 }
 
 // if you lose
@@ -257,8 +258,6 @@ Console.WriteLine($"Total: {playerHandVal}");
 Console.WriteLine();
 Console.WriteLine("Dealer Cards");
 
-// PrintCards(dealerHand);
-// Console.WriteLine($"Total: {dealerHandVal}");
 Console.WriteLine(dealerHand[0]);   // hide dealer's 2nd card
 Console.WriteLine($"partial: {cardValDict[dealerHand[0][0].ToString()]}");  // hide total
 
@@ -266,30 +265,42 @@ Console.WriteLine();
 // Console.WriteLine("Deck Cards Remaining");
 // PrintCards(deck);
 
-// 6) Check for Blackjack 21 tie
-if (playerHandVal == 21 && dealerHandVal == 21)
-{
-    Console.WriteLine("Tie - Push to next round");
-}
 
-// 7). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
-    // Double Down: draw a card, double bet, and stand. Dealer hits until over 17
-    // Surrender: forfeit, dealer wins, lose half of bet
-    // Stand: end turn
+
+// 6). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
+// Double Down: Double bet, draw card, end turn
+// Surrender: forfeit, dealer wins, lose half of bet
+// Stand: end turn
+// Hit: draw a card
+// Split: ??? (eeh, skip for now)
 playerTurn(ref playerHand, ref deck, ref playerHandVal);
 
-// 8). Dealer's turn
+// 7). Dealer's turn
 Console.WriteLine("Dealer's Turn");
 // dealer flips up the face-down card
-// check dealer hand value
-// if hand is less than 17, keep hitting
-// compare player and dealers hands. Either lose, win, or push (tie)
+PrintCards(dealerHand);
+Console.WriteLine($"Total: {dealerHandVal}");
 
-// Hit: draw a card
-// Stand: end turn
-// Double Down: Double bet, draw card, end turn
-// Split: ??? (eeh, skip for now)
-// Surrender: After initial deal, give up, but only lose 1/2 of bet
+void dealerTurn(ref List<string> dealerHand, ref List<string> deck, ref int dealerHandVal, ref int playerHandVal)
+{
+
+    // check dealer hand value
+    // if hand is less than 17, keep hitting
+    while (dealerHandVal < 17)
+    {
+        hit(ref dealerHand, ref deck, ref dealerHandVal);
+    }
+    // compare player and dealers hands. Either lose, win, or push (tie)
+    // 6) Check for Blackjack 21 tie
+    if (playerHandVal == 21 && dealerHandVal == 21)
+    {
+        Console.WriteLine("Tie - Push to next round");
+    }
+}
+
+dealerTurn(ref dealerHand, ref deck, ref dealerHandVal, ref playerHandVal);
+
+
 
 
 
