@@ -1,6 +1,32 @@
 # BlackJackConsoleApp
 ♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️
 
+
+/*
+Cycle of a Blackjack round:
+1.[x] Players place bets within table limits.
+2.[x] Dealer shuffles (or uses a shoe if multiple decks).
+3.[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
+4.[x -skip] Check for natural Blackjack (21 with first two cards):
+    a. If dealer has it, hand ends (unless player also has it → push).
+    b. If players have it and dealer doesn’t, they’re paid immediately.
+5. [x -partial] Player turns (starting left of dealer):
+    a. [x] Choose to Hit
+    b. [x] Stand
+    c. [] Double Down
+    d. [] Split (if applicable)
+    e. [] or Surrender (if allowed).
+6. [x] Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
+7. Compare hands:
+    a. [x] If player busts → automatic loss.
+    b. [x] If dealer busts → remaining players win.
+    c. [x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
+8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
+
+*/
+
+
+
 // auto assume value of ace, depending on what wins you the game
 // if you go over 21 with ace, then its value drops to 1. So starts at 11, reduces to 1 to avoid bust
 

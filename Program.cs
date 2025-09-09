@@ -206,11 +206,18 @@ bool isBust(int handVal)
 // [x] Stand: end turn
 // [x] Hit: draw a card
 // Split: ??? (eeh, skip for now)
-bool playerTurn(ref List<string> playerHand, ref List<string> deck, ref int playerHandVal)
+bool playerTurn(ref List<string> playerHand, ref List<string> deck, ref int playerHandVal, ref int bet)
 {
+    bool isNextTurn = false;   // after the first or initial turn
     Console.WriteLine("Enter option: [h] Hit, [s] Stand, [d] Double Down, [e] Surrender");
     while (true)
     {
+        // inform playe of updated options after hitting
+        if (isNextTurn)
+        {
+            Console.WriteLine("Enter option: [h] Hit, [s] Stand, [e] Surrender");
+        }
+
         var key = Console.ReadKey(intercept: true).KeyChar;
         switch (key)
         {
@@ -221,10 +228,30 @@ bool playerTurn(ref List<string> playerHand, ref List<string> deck, ref int play
                 return false; // exit
         }
 
+        // Double Down: draw a card, double bet, end turn 
+        // can only double down after recieving the initial 2 cards
+        // Once you hit an additinal card, double down option disappears
+        if (!isNextTurn)
+        {
+            if (key == 'd')
+            {
+                // [x] double bet value
+                bet = bet + bet;
+                // [x] draw a card
+                hit(ref playerHand, ref deck, ref playerHandVal);
+                // [x] end turn
+                return isBust(playerHandVal);
+            }
+        }
+
         if (isBust(playerHandVal))
         {
             return true;
         }
+
+        // game state update after first turn
+        isNextTurn = true;
+
         // exit player turn
         // if (key == 's')
         // {
@@ -346,7 +373,7 @@ while (bank > 9)
 
     // 6). Player turns: Choose to Hit, Stand, Double Down, Split (if applicable), or Surrender (if allowed).
     bool playerBusted = false;  // track if player busts
-    playerBusted = playerTurn(ref playerHand, ref deck, ref playerHandVal);
+    playerBusted = playerTurn(ref playerHand, ref deck, ref playerHandVal, ref bet);
 
     // 7). Dealer's turn
     Console.WriteLine("Dealer's Hand");
@@ -370,31 +397,6 @@ while (bank > 9)
 
 // 9. Loop until player becomes  bankrupt
 
-
-
-
-/*
-Cycle of a Blackjack round:
-1.[x] Players place bets within table limits.
-2.[x] Dealer shuffles (or uses a shoe if multiple decks).
-3.[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
-4.[x -skip] Check for natural Blackjack (21 with first two cards):
-    a. If dealer has it, hand ends (unless player also has it → push).
-    b. If players have it and dealer doesn’t, they’re paid immediately.
-5. [x -partial] Player turns (starting left of dealer):
-    a. [x] Choose to Hit
-    b. [x] Stand
-    c. [] Double Down
-    d. [] Split (if applicable)
-    e. [] or Surrender (if allowed).
-6. [x] Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
-7. Compare hands:
-    a. [x] If player busts → automatic loss.
-    b. [x] If dealer busts → remaining players win.
-    c. [x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
-8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
-
-*/
 
 
 string getRecked = @"⠀⠀⠀⣿⣿⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
