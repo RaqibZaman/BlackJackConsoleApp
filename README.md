@@ -2,7 +2,6 @@
 ♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️
 
 
-/*
 Cycle of a Blackjack round:
 1.[x] Players place bets within table limits.
 2.[x] Dealer shuffles (or uses a shoe if multiple decks).
@@ -23,7 +22,6 @@ Cycle of a Blackjack round:
     c. [x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
 
-*/
 
 
 
