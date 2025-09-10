@@ -226,6 +226,10 @@ bool playerTurn(ref List<string> playerHand, ref List<string> deck, ref int play
                 break;
             case 's':
                 return false; // exit
+            case 'e':
+                bet = bet / 2;
+                playerHandVal = 10000; // make sure he loses :D
+                return true;
         }
 
         // Double Down: draw a card, double bet, end turn 
