@@ -1,26 +1,31 @@
 # BlackJackConsoleApp
+
 ♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️♦️♣️♥️♠️
 
 
-Cycle of a Blackjack round:
-1.[x] Players place bets within table limits.
-2.[x] Dealer shuffles (or uses a shoe if multiple decks).
-3.[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
-4.[x -skip] Check for natural Blackjack (21 with first two cards):
-    a. If dealer has it, hand ends (unless player also has it → push).
-    b. If players have it and dealer doesn’t, they’re paid immediately.
-5. [x -partial] Player turns (starting left of dealer):
-    a. [x] Choose to Hit
-    b. [x] Stand
-    c. [] Double Down
-    d. [] Split (if applicable)
-    e. [] or Surrender (if allowed).
-6. [x] Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
+
+**Cycle of a Blackjack round:**
+
+
+1. \[x] Players place bets within table limits.
+2. \[x] Dealer shuffles (or uses a shoe if multiple decks).
+3. \[x] Initial deal: each player gets 2 cards; dealer gets 2 cards (1 face up, 1 face down).
+4. \[x -skip] Check for natural Blackjack (21 with first two cards):
+   a. If dealer has it, hand ends (unless player also has it → push).
+   b. If players have it and dealer doesn’t, they’re paid immediately.
+5. \[x -partial] Player turns (starting left of dealer):
+   a. \[x] Choose to Hit
+   b. \[x] Stand
+   c. \[] Double Down
+   d. \[] Split (if applicable)
+   e. \[] or Surrender (if allowed).
+6. \[x] Dealer’s turn: reveal hole card, draw until total is 17 or higher (rules vary for “soft 17”).
 7. Compare hands:
-    a. [x] If player busts → automatic loss.
-    b. [x] If dealer busts → remaining players win.
-    c. [x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
+   a. \[x] If player busts → automatic loss.
+   b. \[x] If dealer busts → remaining players win.
+   c. \[x] Otherwise, higher total ≤21 wins; equal totals = push (tie).
 8. Payouts are made (usually 3:2 for Blackjack, 1:1 for normal win, insurance pays 2:1).
+
 
 
 
@@ -36,7 +41,7 @@ Because the player could draw a card and likewise the dealer, I though I'd just 
 
 Note to self. If a variable is declared before a function, you don't have to add it to the function params. However I don't know if in this case it would be a pass by value or pass by reference!
 
-// [rule option] if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
+// \[rule option] if your hand is already 21 with 2 cards (e.g. ace plus jack/queen/king) then you automatically win the round (I'm wondering about the dealer end)
 
 // round 1
 // deal 1 faced-up card to player
@@ -56,7 +61,9 @@ Note to self. If a variable is declared before a function, you don't have to add
 // finish round by "stay" to abstain
 
 
+
 // need a reprint of total amount available
 
 // "hit" to ask for another card, "stay" to abstain
 // Dealer: After the players are done hitting, he flips his faced-down card. If it is 16 or under, he has to pick another card from the deck. If his hand is 17 or higher, the dealer has to stay with his hand of cards. If the dealer busts, then player wins twice the bet.
+
